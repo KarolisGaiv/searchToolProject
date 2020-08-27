@@ -15,13 +15,18 @@ const puppeteer = require('puppeteer');
         await page.goto('https://www.pathofexile.com/trade/search/Harvest', { waitUntil: 'networkidle0' });
 
         const itemSelector = '#trade > div.top > div.search-panel > div.search-bar.search-advanced > div > div.search-advanced-pane.blue > div:nth-child(1) > div.filter-group-body > div:nth-child(1) > span > div.multiselect.filter-select > div.multiselect__tags > input';
+        const itemRarity = '#trade > div.top > div.search-panel > div.search-bar.search-advanced > div > div.search-advanced-pane.blue > div.filter-group.expanded > div.filter-group-body > div:nth-child(2) > span > div.multiselect.filter-select > div.multiselect__tags > input'
         const searchButton = '#trade > div.top > div.controls > div.controls-center > button';
         const filterLoader = '#trade > div.top > div.controls > div.controls-right > button.btn.toggle-search-btn > span:nth-child(2)';
 
-        await page.click(itemSelector);
-
         // **Hard coded value "Boots" to look for in the website 
+        await page.click(itemSelector);
         await page.keyboard.type('Boots');
+        await page.keyboard.press('Enter');
+
+        // Hard coded value of "RARE item type to look for in the website
+        await page.click(itemRarity);
+        await page.keyboard.type('Rare');
         await page.keyboard.press('Enter');
 
         await page.click(searchButton);
@@ -31,22 +36,25 @@ const puppeteer = require('puppeteer');
             .waitForSelector('.resultset > div[class="row"]')
             .then(() => page.evaluate(() => {
                 const itemRow = [];
-                const itemNodeList = document.querySelectorAll('.resultset > div[class="row"] > div[class="middle"]'
-                );
+                const itemNodeList = document.querySelectorAll('.resultset > div[class="row"] > div[class="middle"] > div[class="itemPopupContainer newItemPopup rarePopup"] > div[class="itemBoxContent"]');
 
+                // Convert NodeList to regular array
                 const itemArray = Array.from(itemNodeList);
-                console.log(itemArray);
 
-                // itemNodeList.forEach(item => {
-                //     const itemInfo = item.getElementsByClassName('itemHeader');
-                //     console.log(itemInfo);
-                // });
+                // Print each item in array in plain text format
+                // for (item in itemArray) {
+                //     console.log(itemArray[item].innerText);
+                // }
+
+                // Prints each item in plain text in array
+                for (item in itemArray) {
+                    const textItem = itemArray[item].innerText;
+                    itemRow.push(textItem);
+                };
+                console.log(itemRow);
              })
             )
             .catch(() => console.log('Selector Error'));
-
-        // await browser.close();
-
     } catch (e) {
         console.log('our error', e);
     }
